@@ -1,0 +1,60 @@
+#include <cstrike>
+
+Handle g_hTimer[MAXPLAYERS+1];
+
+
+public void OnPluginStart()
+{
+    HookEvent("player_death", Event_PlayerDeath);    
+    HookEvent("player_spawn", Event_PlayerSpawn);     
+}
+
+public void Event_PlayerSpawn(Event hEvent, const char[] sEvName, bool bDontBroadcast)
+{
+
+    int iClient = GetClientOfUserId(hEvent.GetInt("userid")); 
+    if(g_hTimer[iClient]) 
+    {
+
+        KillTimer(g_hTimer[iClient]);
+        g_hTimer[iClient] = null;   
+    }
+}
+
+public void OnClientDisconnect(int iClient)
+{
+
+    if(g_hTimer[iClient]) 
+    {
+        KillTimer(g_hTimer[iClient]); 
+        g_hTimer[iClient] = null;   
+    }
+}
+
+public void Event_PlayerDeath(Event hEvent, const char[] sEvName, bool bDontBroadcast)
+{
+    int iUserID = hEvent.GetInt("userid");
+    int iClient = GetClientOfUserId(iUserID);
+
+    if(iClient && GetUserAdmin(iClient) != INVALID_ADMIN_ID)
+    {
+        if(g_hTimer[iClient])
+        {
+            KillTimer(g_hTimer[iClient]);
+        }
+        g_hTimer[iClient] = CreateTimer(60.0, Timer_RespawnClient, iClient);
+     
+    }
+}
+
+public Action Timer_RespawnClient(Handle hTimer, any iClient) 
+{
+    g_hTimer[iClient] = null;
+
+    if(!IsPlayerAlive(iClient))
+    {
+        CS_RespawnPlayer(iClient);
+    }
+
+    return Plugin_Stop;
+}
