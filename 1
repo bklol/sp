@@ -1,0 +1,39 @@
+#include <cstrike> 
+
+public void OnPluginStart()
+{
+    HookEvent("player_death", Event_PlayerDeath);   
+}
+
+public void Event_PlayerDeath(Event hEvent, const char[] sEvName, bool bDontBroadcast)   
+{
+
+    int iUserID = hEvent.GetInt("userid"); 
+    int iClient = GetClientOfUserId(iUserID);  
+
+
+if(iClient != 0)   
+{
+        if(GetUserAdmin(iClient) != INVALID_ADMIN_ID)
+        {
+
+            CreateTimer(60.0, Timer_RespawnClient, iUserID);
+
+        }
+    }
+}
+
+public Action Timer_RespawnClient(Handle hTimer, any iUserID)
+{
+    int iClient = GetClientOfUserId(iUserID); 
+    if(iClient)
+    {
+
+        if(!IsPlayerAlive(iClient)) 
+            CS_RespawnPlayer(iClient);
+
+        }
+    }
+   
+    return Plugin_Stop;
+}
